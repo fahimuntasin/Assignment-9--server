@@ -1,24 +1,21 @@
+const express = require("express");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
-const serverless = require("serverless-http");
-const app = require("../app");
 
-let cachedDb = false;
+const app = express();
+app.use(cors({ origin: process.env.CLIENT_URL || "*", credentials: true }));
+app.use(express.json());
+app.use(cookieParser());
 
-async function connectDB() {
-  if (cachedDb) return;
-  try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 15000,
-    });
-    cachedDb = true;
-  } catch (err) {
-    console.error("MongoDB connection error:", err.message);
-  }
-}
+app.use("/api/auth", require("../routes/auth"));
+app.use("/api/pets", require("../routes/pet"));
+app.use("/api/requests", require("../routes/request"));
 
-const handler = serverless(app);
+app.get("/", (req, res) => res.json({ message: "Pet Adoption API is running" }));
 
-module.exports = async (req, res) => {
-  await connectDB();
-  return handler(req, res);
-};
+mongoose.connect(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 10000 })
+  .then(() => console.log("MongoDB connected"))
+  .catch(e => console.error("MongoDB error:", e.message));
+
+module.exports = app;
