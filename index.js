@@ -27,15 +27,23 @@ app.get("/", (req, res) => {
   res.json({ message: "Pet Adoption API is running" });
 });
 
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
+let cachedDb = null;
+async function connectDB() {
+  if (cachedDb) return cachedDb;
+  try {
+    await mongoose.connect(process.env.MONGODB_URI);
+    cachedDb = mongoose.connection;
     console.log("Connected to MongoDB");
+  } catch (err) {
+    console.error("MongoDB connection error:", err.message);
+  }
+}
+
+if (!process.env.VERCEL) {
+  connectDB().then(() => {
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((err) => {
-    console.error("MongoDB connection error:", err.message);
   });
+}
 
 module.exports = app;
