@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const { sendWelcomeEmail } = require("../services/emailService");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
@@ -51,6 +52,10 @@ exports.register = async (req, res) => {
       photoURL: photoURL || "",
       password: hashedPassword,
     });
+
+    sendWelcomeEmail(user).catch((err) =>
+      console.error("Failed to send welcome email:", err.message)
+    );
 
     const token = generateToken(user._id);
     setTokenCookie(res, token);
