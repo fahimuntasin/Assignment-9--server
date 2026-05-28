@@ -71,6 +71,7 @@ exports.register = async (req, res) => {
       email: user.email,
       photoURL: user.photoURL,
       role: user.role,
+      token,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -108,6 +109,7 @@ exports.login = async (req, res) => {
       email: user.email,
       photoURL: user.photoURL,
       role: user.role,
+      token,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -143,6 +145,7 @@ exports.googleLogin = async (req, res) => {
       email: user.email,
       photoURL: user.photoURL,
       role: user.role,
+      token,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
